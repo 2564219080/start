@@ -17,8 +17,15 @@
     function foo() {
         return new Promise(function(resolve, reject) {
             setTimeout(() => {
-
-            }, timeout);
+                // resolve(11)
+                reject('err')
+            }, 3000);
         })
     }
+
+    foo().then(function(data) {
+        console.log(data)
+    }).catch(function(err) {
+        console.log('出现了一个未知的错误', err)
+    })
 </script>
