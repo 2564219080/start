@@ -10,11 +10,17 @@ const router = require('./router/router')
 //导入bodyParser
 const bodyParser = require('body-parser')
 
+//导入处理跨域
+const cors = require('cors')
+app.use(cors())
+
 //处理post请求
 app.use(express.urlencoded({
     extended: false
 }))
 app.use(bodyParser.json())
+
+
 
 //挂载路由
 app.use('/book', router)

@@ -58,17 +58,15 @@ exports.addBook = (req, res) => {
 
 //编辑图书方法
 exports.editBook = (req, res) => {
-    let info = req.body
-    info.id = req.params.id
+    let id = req.params.id
+    let book = {};
     data.some((item) => {
-        if (info.id == item.id) {
-            for (let k in info) {
-                item[k] = info[k]
-            }
-            return true
+        if (id == item.id) {
+            book = item;
+            return true;
         }
-    })
-    writeDataToFile(res)
+    });
+    res.json(book);
 }
 
 //删除图书方法

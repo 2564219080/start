@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        td {
+            width: 100px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <table>
+            编号：
+            <input type="number" value="" v-model='id' v-focus :disabled='flag'> 书名：
+            <input type="text" v-model='name'> <button @click='addHandler' :disabled='submitFlag'>添加</button>
+
+            <thead>
+                <tr>
+                    <th>编号</th>
+                    <th>名称</th>
+                    <th>时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr :key='item.index' v-for="(item,index) in books">
+                    <td>{{item.id}}</td>
+                    <td>{{item.name}}</td>
+                    <td>{{item.data}}</td>
+                    <td><a href="" @click.prevent='updateHandler(item.id)'>修改</a> <span> |</span>
+                        <a href="" @click.prevent='removeHandler(item.id)'>删除</a>
+                    </td>
+                </tr>
+                <p>
+                    <tr>图书总数量：{{total}}</tr>
+                </p>
+            </tbody>
+
+        </table>
+    </div>
+
+</body>
+
+</html>
+<script src="../node_modules/vue/dist/vue.js"></script>
+<script src="../node_modules/axios/dist/axios.js"></script>
+<script>
+    axios.defaults.baseURL = 'http://localhost:3000'
+    axios.interceptors.response.use(function(res) {
+        return res.data
+    }, function(err) {
+        console.log(err)
+    })
+
+    Vue.directive('focus', {
+        inserted: function(el) {
+            el.focus()
+        }
+    })
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            id: '',
+            name: '',
+            flag: false,
+            books: '',
+            submitFlag: false,
+        },
+        methods: {
+            addHandler: async function() {
+                if (this.flag) {
+                    // this.flag = this.books.some((item) => {
+                    //     if (item.id == this.id) {
+                    //         item.name = this.name
+                    //         return false
+                    //     }
+                    // })
+
+                    var ret = await axios.put('book/toEdit/' + this.id, {
+                        name: this.name
+                    })
+                    console.log(ret)
+                    if (ret.status == 200) {
+                        this.queryData()
+                    }
+                    this.flag = false
+                } else {
+                    // console.log(this.books)
+                    // var book = {}
+                    // book.name = this.name
+                    // book.id = this.id
+                    // this.books.push(book)
+
+                    var ret = await axios.post('book/', {
+                        name: this.name
+                    })
+                    if (ret.status == 200) {
+                        // 重新加载列表数据
+                        this.queryData();
+                    }
+                }
+                this.id = ''
+                this.name = ''
+            },
+            async updateHandler(id) {
+                this.flag = true
+                    // var book = this.books.filter((item) => {
+                    //     return item.id == id
+                    // })
+                    // this.id = book[0].id
+                    // this.name = book[0].name
+                var ret = await axios.get('book/' + this.id)
+                this.id = ret.id
+                this.name = ret.name
+            },
+            async removeHandler(id) {
+                // var index = this.books.findIndex((item) => {
+                //     return item.id == id
+                // })
+                // this.books.splice(index, 1)
+                // this.books = this.books.filter((item) => {
+                //     return item.id != id
+                // })
+                let ret = await axios.delete('book/' + this.id)
+                if (ret.status == 200) {
+                    this.queryData()
+                }
+            },
+            //使用箭头函数一定要注意内部this的指向问题
+            queryData: async function() {
+                this.books = await axios.get('book/')
+                    // console.log(this)
+            }
+
+        },
+        computed: {
+            total: function() {
+                return this.books.length
+            }
+        },
+        mounted() {
+            // var data = [{
+            //     id: 1,
+            //     name: '红楼梦',
+            //     date: ''
+            // }, {
+            //     id: 2,
+            //     name: '水浒传',
+            //     date: ''
+            // }, {
+            //     id: 3,
+            //     name: '三国演义',
+            //     date: ''
+            // }, {
+            //     id: 4,
+            //     name: '西游记',
+            //     date: ''
+            // }]
+            // this.books = data
+
+            this.queryData();
+
+        },
+        watch: {
+            name: async function(val) {
+                // this.submitFlag = this.books.some((item) => {
+                //     return item.name == val
+                // })
+                var ret = await axios.get('book/' + this.name)
+                if (ret.status == 1) {
+                    this.submitFlag = true
+                } else {
+                    this.submitFlag = false
+                }
+
+            }
+        }
+    })
+</script>

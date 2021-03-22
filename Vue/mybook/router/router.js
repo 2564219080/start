@@ -14,7 +14,7 @@ router.get('/', routerMethods.getAllBooks)
 router.post('/', routerMethods.addBook)
 
 //编辑图书
-router.put('/toEdit', routerMethods.editBook)
+router.put('/toEdit/:id', routerMethods.editBook)
 
 //删除图书
 router.delete('/:id', routerMethods.deleteBook)
